@@ -38,7 +38,7 @@
   margin-left: 4px;
 }
 
-.ec-slideshow__arrows {
+.cc-slideshow__arrows {
   position: absolute;
   bottom: 52px;
   right: 69px;
@@ -51,7 +51,7 @@
   gap: 8px;
 }
 
-.ec-slideshow__arrow {
+.cc-slideshow__arrow {
   background: none;
   display: flex;
   align-items: center;
@@ -65,25 +65,25 @@
   color: #ffffff;
 }
 
-.ec-slideshow__arrow:hover {
+.cc-slideshow__arrow:hover {
   background: rgba(255, 255, 255, 0.2);
   border-radius: 4px;
 }
 
-.ec-slideshow__arrow[disabled],
-.ec-slideshow__arrow:disabled {
+.cc-slideshow__arrow[disabled],
+.cc-slideshow__arrow:disabled {
   opacity: 0.3;
   pointer-events: none;
   cursor: not-allowed;
 }
 
-.ec-slideshow__arrow svg {
+.cc-slideshow__arrow svg {
   width: 16px;
   height: 9px;
   flex-shrink: 0;
 }
 
-.ec-slideshow__dots {
+.cc-slideshow__dots {
   display: flex;
   align-items: center;
   z-index: 3;
@@ -91,7 +91,7 @@
   pointer-events: auto;
 }
 
-.ec-slideshow__dot {
+.cc-slideshow__dot {
   height: 2px;
   background: rgba(255, 255, 255, 0.5);
   cursor: pointer;
@@ -101,31 +101,31 @@
   min-width: 0;
 }
 
-.ec-slideshow__dots .dot {
+.cc-slideshow__dots .dot {
   width: 10px;
   border: none;
   padding: 0;
   display: block;
 }
 
-.ec-slideshow__dot--active,
-.ec-slideshow__dots .slider-counter__link--active.ec-slideshow__dot {
+.cc-slideshow__dot--active,
+.cc-slideshow__dots .slider-counter__link--active.cc-slideshow__dot {
   width: 20px;
   background: #ffffff;
 }
 
-.ec-slideshow__dots .slider-counter__link--active.ec-slideshow__dot .dot {
+.cc-slideshow__dots .slider-counter__link--active.cc-slideshow__dot .dot {
   width: 100%;
   height: 100%;
   border-radius: inherit;
   background: #ffffff;
 }
 
-.ec-slideshow__dot:not(.ec-slideshow__dot--active):not(.slider-counter__link--active) {
+.cc-slideshow__dot:not(.cc-slideshow__dot--active):not(.slider-counter__link--active) {
   width: 10px;
 }
 
-.ec-slideshow__dots .ec-slideshow__dot.slider-counter__link--numbers {
+.cc-slideshow__dots .cc-slideshow__dot.slider-counter__link--numbers {
   width: auto;
   min-width: 1.75rem;
   height: auto;
@@ -137,14 +137,14 @@
   line-height: 1;
 }
 
-.ec-slideshow__dots .slider-counter__link--active.ec-slideshow__dot.slider-counter__link--numbers {
+.cc-slideshow__dots .slider-counter__link--active.cc-slideshow__dot.slider-counter__link--numbers {
   width: auto;
   background: #ffffff;
   color: rgba(0, 0, 0, 0.85);
 }
 
 @media screen and (max-width: 749px) {
-  .ec-slideshow__arrows {
+  .cc-slideshow__arrows {
     right: auto;
     left: 50%;
     bottom: 20px;
