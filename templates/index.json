@@ -116,33 +116,35 @@
             "color_scheme": "scheme-4"
           }
         },
-        "slide_iaKNLV": {
+        "slide_6AHiKP": {
           "type": "slide",
           "settings": {
-            "image_overlay_opacity": 0,
-            "heading": "Image slide",
+            "image": "shopify://shop_images/pexels-gije-3262423.jpg",
+            "mobile_image": "shopify://shop_images/pexels-arina-krasnikova-5951742.jpg",
+            "image_overlay_opacity": 40,
+            "heading": "Smarthpones",
             "heading_size": "h1",
-            "subheading": "Tell your brand's story through images",
-            "button_label": "Button label",
-            "link": "",
+            "subheading": "Tecnologia que conecta e transforma",
+            "button_label": "Saiba mais",
+            "link": "#",
             "button_style_secondary": false,
-            "show_text_box": true,
-            "box_align": "middle-center",
+            "show_text_box": false,
+            "box_align": "bottom-center",
             "text_alignment": "center",
             "text_alignment_mobile": "center",
-            "color_scheme": ""
+            "color_scheme": "scheme-4"
           }
         }
       },
       "block_order": [
         "slide_N8CD9t",
-        "slide_iaKNLV"
+        "slide_6AHiKP"
       ],
       "name": "CC Slideshow",
       "settings": {
         "layout": "full_bleed",
         "slide_height": "large",
-        "slider_visual": "counter",
+        "slider_visual": "dots",
         "auto_rotate": false,
         "change_slides_speed": 5,
         "image_behavior": "none",
