@@ -126,11 +126,15 @@
     <div class="banner__media media{% if desktop_has_video == false and mobile_has_video == false %} placeholder{% endif %}{% if section.settings.image_behavior != 'none' %} animate--{{ section.settings.image_behavior }}{% endif %}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}">
       <div class="cc-image-banner__video-layer cc-image-banner__video--desktop">
         {%- if section.settings.video != null -%}
-          {{ section.settings.video | video_tag: autoplay: true, loop: true, muted: true, controls: false }}
+          {{
+            section.settings.video
+            | video_tag: autoplay: true, loop: true, muted: true, controls: false, preload: 'none'
+          }}
         {%- elsif section.settings.video_url != blank -%}
           {%- assign video_id = section.settings.video_url.id -%}
           {%- if section.settings.video_url.type == 'youtube' -%}
             <iframe
+              loading="lazy"
               class="cc-image-banner__video-iframe"
               src="https://www.youtube.com/embed/{{ video_id }}?enablejsapi=1&autoplay=1&mute=1&loop=1&playlist={{ video_id }}&controls=0&rel=0"
               allow="autoplay; encrypted-media"
@@ -139,6 +143,7 @@
             ></iframe>
           {%- else -%}
             <iframe
+              loading="lazy"
               class="cc-image-banner__video-iframe"
               src="https://player.vimeo.com/video/{{ video_id }}?autoplay=1&muted=1&loop=1&background=1&controls=0"
               allow="autoplay; encrypted-media"
@@ -155,11 +160,15 @@
 
       <div class="cc-image-banner__video-layer cc-image-banner__video--mobile">
         {%- if section.settings.video_mobile != null -%}
-          {{ section.settings.video_mobile | video_tag: autoplay: true, loop: true, muted: true, controls: false }}
+          {{
+            section.settings.video_mobile
+            | video_tag: autoplay: true, loop: true, muted: true, controls: false, preload: 'none'
+          }}
         {%- elsif section.settings.video_url_mobile != blank -%}
           {%- assign video_id = section.settings.video_url_mobile.id -%}
           {%- if section.settings.video_url_mobile.type == 'youtube' -%}
             <iframe
+              loading="lazy"
               class="cc-image-banner__video-iframe"
               src="https://www.youtube.com/embed/{{ video_id }}?enablejsapi=1&autoplay=1&mute=1&loop=1&playlist={{ video_id }}&controls=0&rel=0"
               allow="autoplay; encrypted-media"
@@ -168,6 +177,7 @@
             ></iframe>
           {%- else -%}
             <iframe
+              loading="lazy"
               class="cc-image-banner__video-iframe"
               src="https://player.vimeo.com/video/{{ video_id }}?autoplay=1&muted=1&loop=1&background=1&controls=0"
               allow="autoplay; encrypted-media"
@@ -176,11 +186,15 @@
             ></iframe>
           {%- endif -%}
         {%- elsif section.settings.video != null -%}
-          {{ section.settings.video | video_tag: autoplay: true, loop: true, muted: true, controls: false }}
+          {{
+            section.settings.video
+            | video_tag: autoplay: true, loop: true, muted: true, controls: false, preload: 'none'
+          }}
         {%- elsif section.settings.video_url != blank -%}
           {%- assign video_id = section.settings.video_url.id -%}
           {%- if section.settings.video_url.type == 'youtube' -%}
             <iframe
+              loading="lazy"
               class="cc-image-banner__video-iframe"
               src="https://www.youtube.com/embed/{{ video_id }}?enablejsapi=1&autoplay=1&mute=1&loop=1&playlist={{ video_id }}&controls=0&rel=0"
               allow="autoplay; encrypted-media"
@@ -189,6 +203,7 @@
             ></iframe>
           {%- else -%}
             <iframe
+              loading="lazy"
               class="cc-image-banner__video-iframe"
               src="https://player.vimeo.com/video/{{ video_id }}?autoplay=1&muted=1&loop=1&background=1&controls=0"
               allow="autoplay; encrypted-media"
