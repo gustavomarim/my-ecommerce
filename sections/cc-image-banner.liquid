@@ -1,12 +1,23 @@
 {{ 'section-image-banner.css' | asset_url | stylesheet_tag }}
 
-{%- if section.settings.image_height == 'adapt' and section.settings.image != blank -%}
+{%- liquid
+  assign media_aspect_ratio = 0
+  if section.settings.media_type == 'video'
+    if section.settings.cover_image != blank
+      assign media_aspect_ratio = section.settings.cover_image.aspect_ratio
+    endif
+  elsif section.settings.image != blank
+    assign media_aspect_ratio = section.settings.image.aspect_ratio
+  endif
+-%}
+
+{%- if section.settings.image_height == 'adapt' and media_aspect_ratio != 0 -%}
   {%- style -%}
     @media screen and (max-width: 749px) {
       #Banner-{{ section.id }}::before,
       #Banner-{{ section.id }} .banner__media::before,
       #Banner-{{ section.id }}:not(.banner--mobile-bottom) .banner__content::before {
-        padding-bottom: {{ 1 | divided_by: section.settings.image.aspect_ratio | times: 100 }}%;
+        padding-bottom: {{ 1 | divided_by: media_aspect_ratio | times: 100 }}%;
         content: '';
         display: block;
       }
@@ -15,7 +26,7 @@
     @media screen and (min-width: 750px) {
       #Banner-{{ section.id }}::before,
       #Banner-{{ section.id }} .banner__media::before {
-        padding-bottom: {{ 1 | divided_by: section.settings.image.aspect_ratio | times: 100 }}%;
+        padding-bottom: {{ 1 | divided_by: media_aspect_ratio | times: 100 }}%;
         content: '';
         display: block;
       }
@@ -26,6 +37,49 @@
 {%- style -%}
   #Banner-{{ section.id }}::after {
     opacity: {{ section.settings.image_overlay_opacity | divided_by: 100.0 }};
+  }
+{%- endstyle -%}
+
+{%- style -%}
+  /* vídeo preenche o banner e fica atrás do overlay */
+  #Banner-{{ section.id }} .cc-image-banner__video-layer {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+  }
+
+  #Banner-{{ section.id }} .cc-image-banner__video-layer video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  #Banner-{{ section.id }} .cc-image-banner__video-layer iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  #Banner-{{ section.id }} .cc-image-banner__video--desktop {
+    display: block;
+  }
+  #Banner-{{ section.id }} .cc-image-banner__video--mobile {
+    display: none;
+  }
+
+  @media screen and (max-width: 749px) {
+    #Banner-{{ section.id }} .cc-image-banner__video--desktop {
+      display: none;
+    }
+    #Banner-{{ section.id }} .cc-image-banner__video--mobile {
+      display: block;
+    }
   }
 {%- endstyle -%}
 
@@ -53,67 +107,165 @@
 
 <div
   id="Banner-{{ section.id }}"
-  class="banner banner--content-align-{{ section.settings.desktop_content_alignment }} banner--content-align-mobile-{{ section.settings.mobile_content_alignment }} banner--{{ section.settings.image_height }}{% if section.settings.stack_images_on_mobile and section.settings.image != blank and section.settings.image_2 != blank %} banner--stacked{% endif %}{% if section.settings.image_height == 'adapt' and section.settings.image != blank %} banner--adapt{% endif %}{% if section.settings.show_text_below %} banner--mobile-bottom{%- endif -%}{% if section.settings.show_text_box == false %} banner--desktop-transparent{% endif %}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}"
+  class="banner banner--content-align-{{ section.settings.desktop_content_alignment }} banner--content-align-mobile-{{ section.settings.mobile_content_alignment }} banner--{{ section.settings.image_height }}{% if section.settings.media_type == 'image' and section.settings.stack_images_on_mobile and section.settings.image != blank and section.settings.image_2 != blank %} banner--stacked{% endif %}{% if section.settings.image_height == 'adapt' and media_aspect_ratio != 0 %} banner--adapt{% endif %}{% if section.settings.show_text_below %} banner--mobile-bottom{%- endif -%}{% if section.settings.show_text_box == false %} banner--desktop-transparent{% endif %}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}"
 >
-  {%- if section.settings.image != blank -%}
-    <div class="banner__media media{% if section.settings.image == blank and section.settings.image_2 == blank %} placeholder{% endif %}{% if section.settings.image_2 != blank %} banner__media-half{% endif %}{% if section.settings.image_behavior != 'none' %} animate--{{ section.settings.image_behavior }}{% endif %}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}">
-      {%- liquid
-        assign image_height = section.settings.image.width | divided_by: section.settings.image.aspect_ratio
-        if section.settings.image_2 != blank
-          assign image_class = 'banner__media-image-half'
-        endif
-        if section.settings.image_2 != blank and section.settings.stack_images_on_mobile
-          assign sizes = stacked_sizes
-        elsif section.settings.image_2 != blank
-          assign sizes = half_width
-        else
-          assign sizes = full_width
-        endif
-      -%}
-      {{
-        section.settings.image
-        | image_url: width: 3840
-        | image_tag:
-          width: section.settings.image.width,
-          height: image_height,
-          class: image_class,
-          sizes: sizes,
-          widths: widths,
-          fetchpriority: fetch_priority
-      }}
-    </div>
-  {%- elsif section.settings.image_2 == blank -%}
-    <div class="banner__media media{% if section.settings.image == blank and section.settings.image_2 == blank %} placeholder{% endif %}{% if section.settings.image_2 != blank %} banner__media-half{% endif %}{% if section.settings.image_behavior != 'none' %} animate--{{ section.settings.image_behavior }}{% endif %}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}">
-      {{ 'hero-apparel-1' | placeholder_svg_tag: 'placeholder-svg' }}
+  {%- if section.settings.media_type == 'video' -%}
+    {%- liquid
+      assign desktop_has_video = false
+      if section.settings.video != null or section.settings.video_url != blank
+        assign desktop_has_video = true
+      endif
+
+      assign mobile_has_video = false
+      if section.settings.video_mobile != null or section.settings.video_url_mobile != blank
+        assign mobile_has_video = true
+      elsif desktop_has_video
+        assign mobile_has_video = true
+      endif
+    -%}
+    <div class="banner__media media{% if desktop_has_video == false and mobile_has_video == false %} placeholder{% endif %}{% if section.settings.image_behavior != 'none' %} animate--{{ section.settings.image_behavior }}{% endif %}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}">
+      <div class="cc-image-banner__video-layer cc-image-banner__video--desktop">
+        {%- if section.settings.video != null -%}
+          {{ section.settings.video | video_tag: autoplay: true, loop: true, muted: true, controls: false }}
+        {%- elsif section.settings.video_url != blank -%}
+          {%- assign video_id = section.settings.video_url.id -%}
+          {%- if section.settings.video_url.type == 'youtube' -%}
+            <iframe
+              class="cc-image-banner__video-iframe"
+              src="https://www.youtube.com/embed/{{ video_id }}?enablejsapi=1&autoplay=1&mute=1&loop=1&playlist={{ video_id }}&controls=0&rel=0"
+              allow="autoplay; encrypted-media"
+              allowfullscreen
+              title="Video banner"
+            ></iframe>
+          {%- else -%}
+            <iframe
+              class="cc-image-banner__video-iframe"
+              src="https://player.vimeo.com/video/{{ video_id }}?autoplay=1&muted=1&loop=1&background=1&controls=0"
+              allow="autoplay; encrypted-media"
+              allowfullscreen
+              title="Video banner"
+            ></iframe>
+          {%- endif -%}
+        {%- elsif section.settings.cover_image != blank -%}
+          {{ section.settings.cover_image | image_tag: alt: 'Video banner' }}
+        {%- else -%}
+          {{ 'hero-apparel-1' | placeholder_svg_tag: 'placeholder-svg' }}
+        {%- endif -%}
+      </div>
+
+      <div class="cc-image-banner__video-layer cc-image-banner__video--mobile">
+        {%- if section.settings.video_mobile != null -%}
+          {{ section.settings.video_mobile | video_tag: autoplay: true, loop: true, muted: true, controls: false }}
+        {%- elsif section.settings.video_url_mobile != blank -%}
+          {%- assign video_id = section.settings.video_url_mobile.id -%}
+          {%- if section.settings.video_url_mobile.type == 'youtube' -%}
+            <iframe
+              class="cc-image-banner__video-iframe"
+              src="https://www.youtube.com/embed/{{ video_id }}?enablejsapi=1&autoplay=1&mute=1&loop=1&playlist={{ video_id }}&controls=0&rel=0"
+              allow="autoplay; encrypted-media"
+              allowfullscreen
+              title="Video banner"
+            ></iframe>
+          {%- else -%}
+            <iframe
+              class="cc-image-banner__video-iframe"
+              src="https://player.vimeo.com/video/{{ video_id }}?autoplay=1&muted=1&loop=1&background=1&controls=0"
+              allow="autoplay; encrypted-media"
+              allowfullscreen
+              title="Video banner"
+            ></iframe>
+          {%- endif -%}
+        {%- elsif section.settings.video != null -%}
+          {{ section.settings.video | video_tag: autoplay: true, loop: true, muted: true, controls: false }}
+        {%- elsif section.settings.video_url != blank -%}
+          {%- assign video_id = section.settings.video_url.id -%}
+          {%- if section.settings.video_url.type == 'youtube' -%}
+            <iframe
+              class="cc-image-banner__video-iframe"
+              src="https://www.youtube.com/embed/{{ video_id }}?enablejsapi=1&autoplay=1&mute=1&loop=1&playlist={{ video_id }}&controls=0&rel=0"
+              allow="autoplay; encrypted-media"
+              allowfullscreen
+              title="Video banner"
+            ></iframe>
+          {%- else -%}
+            <iframe
+              class="cc-image-banner__video-iframe"
+              src="https://player.vimeo.com/video/{{ video_id }}?autoplay=1&muted=1&loop=1&background=1&controls=0"
+              allow="autoplay; encrypted-media"
+              allowfullscreen
+              title="Video banner"
+            ></iframe>
+          {%- endif -%}
+        {%- elsif section.settings.cover_image != blank -%}
+          {{ section.settings.cover_image | image_tag: alt: 'Video banner' }}
+        {%- else -%}
+          {{ 'hero-apparel-1' | placeholder_svg_tag: 'placeholder-svg' }}
+        {%- endif -%}
+      </div>
     </div>
   {%- endif -%}
-  {%- if section.settings.image_2 != blank -%}
-    <div class="banner__media media{% if section.settings.image != blank %} banner__media-half{% endif %}{% if section.settings.image_behavior != 'none' %} animate--{{ section.settings.image_behavior }}{% endif %}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}">
-      {%- liquid
-        assign image_height_2 = section.settings.image_2.width | divided_by: section.settings.image_2.aspect_ratio
-        if section.settings.image != blank
-          assign image_class_2 = 'banner__media-image-half'
-        endif
-        if section.settings.image != blank and section.settings.stack_images_on_mobile
-          assign sizes = stacked_sizes
-        elsif section.settings.image_2 != blank
-          assign sizes = half_width
-        else
-          assign sizes = full_width
-        endif
-      -%}
-      {{
-        section.settings.image_2
-        | image_url: width: 3840
-        | image_tag:
-          width: section.settings.image_2.width,
-          height: image_height_2,
-          class: image_class_2,
-          sizes: sizes,
-          widths: widths,
-          fetchpriority: fetch_priority
-      }}
-    </div>
+
+  {%- if section.settings.media_type != 'video' -%}
+    {%- if section.settings.image != blank -%}
+      <div class="banner__media media{% if section.settings.image == blank and section.settings.image_2 == blank %} placeholder{% endif %}{% if section.settings.image_2 != blank %} banner__media-half{% endif %}{% if section.settings.image_behavior != 'none' %} animate--{{ section.settings.image_behavior }}{% endif %}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}">
+        {%- liquid
+          assign image_height = section.settings.image.width | divided_by: section.settings.image.aspect_ratio
+          if section.settings.image_2 != blank
+            assign image_class = 'banner__media-image-half'
+          endif
+          if section.settings.image_2 != blank and section.settings.stack_images_on_mobile
+            assign sizes = stacked_sizes
+          elsif section.settings.image_2 != blank
+            assign sizes = half_width
+          else
+            assign sizes = full_width
+          endif
+        -%}
+        {{
+          section.settings.image
+          | image_url: width: 3840
+          | image_tag:
+            width: section.settings.image.width,
+            height: image_height,
+            class: image_class,
+            sizes: sizes,
+            widths: widths,
+            fetchpriority: fetch_priority
+        }}
+      </div>
+    {%- elsif section.settings.image_2 == blank -%}
+      <div class="banner__media media{% if section.settings.image == blank and section.settings.image_2 == blank %} placeholder{% endif %}{% if section.settings.image_2 != blank %} banner__media-half{% endif %}{% if section.settings.image_behavior != 'none' %} animate--{{ section.settings.image_behavior }}{% endif %}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}">
+        {{ 'hero-apparel-1' | placeholder_svg_tag: 'placeholder-svg' }}
+      </div>
+    {%- endif -%}
+    {%- if section.settings.image_2 != blank -%}
+      <div class="banner__media media{% if section.settings.image != blank %} banner__media-half{% endif %}{% if section.settings.image_behavior != 'none' %} animate--{{ section.settings.image_behavior }}{% endif %}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}">
+        {%- liquid
+          assign image_height_2 = section.settings.image_2.width | divided_by: section.settings.image_2.aspect_ratio
+          if section.settings.image != blank
+            assign image_class_2 = 'banner__media-image-half'
+          endif
+          if section.settings.image != blank and section.settings.stack_images_on_mobile
+            assign sizes = stacked_sizes
+          elsif section.settings.image_2 != blank
+            assign sizes = half_width
+          else
+            assign sizes = full_width
+          endif
+        -%}
+        {{
+          section.settings.image_2
+          | image_url: width: 3840
+          | image_tag:
+            width: section.settings.image_2.width,
+            height: image_height_2,
+            class: image_class_2,
+            sizes: sizes,
+            widths: widths,
+            fetchpriority: fetch_priority
+        }}
+      </div>
+    {%- endif -%}
   {%- endif -%}
   <div class="banner__content banner__content--{{ section.settings.desktop_content_position }} page-width{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
     <div class="banner__box content-container content-container--full-width-mobile color-{{ section.settings.color_scheme }} gradient">
@@ -176,14 +328,75 @@
   },
   "settings": [
     {
+      "type": "select",
+      "id": "media_type",
+      "label": "Tipo de mídia",
+      "options": [
+        {
+          "value": "image",
+          "label": "Imagem"
+        },
+        {
+          "value": "video",
+          "label": "Vídeo"
+        }
+      ],
+      "default": "image"
+    },
+    {
       "type": "image_picker",
       "id": "image",
-      "label": "t:sections.image-banner.settings.image.label"
+      "label": "t:sections.image-banner.settings.image.label",
+      "visible_if": "{{ section.settings.media_type == 'image' }}"
     },
     {
       "type": "image_picker",
       "id": "image_2",
-      "label": "t:sections.image-banner.settings.image_2.label"
+      "label": "t:sections.image-banner.settings.image_2.label",
+      "visible_if": "{{ section.settings.media_type == 'image' }}"
+    },
+    {
+      "type": "video",
+      "id": "video",
+      "label": "Vídeo (Desktop)",
+      "visible_if": "{{ section.settings.media_type == 'video' }}"
+    },
+    {
+      "type": "video",
+      "id": "video_mobile",
+      "label": "Vídeo (Mobile)",
+      "info": "Opcional. Se não preenchido, usa o vídeo desktop.",
+      "visible_if": "{{ section.settings.media_type == 'video' }}"
+    },
+    {
+      "type": "video_url",
+      "id": "video_url",
+      "accept": ["youtube", "vimeo"],
+      "label": "URL do vídeo Desktop (YouTube ou Vimeo)",
+      "info": "Cole a URL do YouTube ou Vimeo",
+      "visible_if": "{{ section.settings.media_type == 'video' }}"
+    },
+    {
+      "type": "video_url",
+      "id": "video_url_mobile",
+      "accept": ["youtube", "vimeo"],
+      "label": "URL do vídeo Mobile",
+      "info": "Opcional. Se não preenchido, usa o vídeo desktop.",
+      "visible_if": "{{ section.settings.media_type == 'video' }}"
+    },
+    {
+      "type": "image_picker",
+      "id": "cover_image",
+      "label": "Imagem de capa (poster)",
+      "info": "Usada para manter a proporção do banner (principalmente quando 'Adaptar') e como fallback visual.",
+      "visible_if": "{{ section.settings.media_type == 'video' }}"
+    },
+    {
+      "type": "image_picker",
+      "id": "cover_image_mobile",
+      "label": "Imagem de capa (poster) Mobile",
+      "info": "Opcional. Se não preenchido, usa a capa desktop.",
+      "visible_if": "{{ section.settings.media_type == 'video' }}"
     },
     {
       "type": "range",
@@ -331,7 +544,8 @@
       "type": "checkbox",
       "id": "stack_images_on_mobile",
       "default": true,
-      "label": "t:sections.image-banner.settings.stack_images_on_mobile.label"
+      "label": "t:sections.image-banner.settings.stack_images_on_mobile.label",
+      "visible_if": "{{ section.settings.media_type == 'image' }}"
     },
     {
       "type": "select",
